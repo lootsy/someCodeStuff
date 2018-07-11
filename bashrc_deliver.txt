@@ -1,0 +1,190 @@
+export LANG="en_US.utf8"
+# Switches the branch to the specified branch and cleans up all messy files
+changeBranch()
+{
+   git checkout $1;
+   # Optional: Removes untracked files (e.g. bin, debug Directory, dlls ...) Be careful, also ignored files like *.csproj.user gets deleted! Those are settings file of visual studio projects...
+   #git clean -f -d
+}
+
+# Updates the specified branch (parameter 2) from the remote point (parameter 1) and creates refspec file if it is not existing
+fetchRemoteBranch()
+{
+ # if only one parameter was specified try to split it
+ if [ $# -eq 1 ]
+ then
+  remotePath=${1%/*};
+  branch=${1#*/};
+  if [ $remotePath != $branch ]
+  then
+   # $1 => specified Parameter => ${1%/*} => returns the string from the left side of the specified parameter. ${1#*/} returns the right part.
+   echo git fetch ${1%/*} ${1#*/}:refs/remotes/origin/${1#*/};
+   git fetch ${1%/*} ${1#*/}:refs/remotes/origin/${1#*/};
+ else
+  echo Parameter $1 is invalid!
+  fi
+ elif [ $# -eq 2 ]
+ then
+  echo git fetch $1 $2:refs/remotes/origin/$2;
+  git fetch $1 $2:refs/remotes/origin/$2;
+ else
+  echo Wrong number of parameters!
+ fi
+}
+
+showRemovableBranches()
+{
+   git fetch --prune
+   removableBranches=$(git branch -vv | grep ": gone]" | awk '!/\*/{print $1}')
+   for i in $removableBranches; do	echo $i; done
+}
+
+cleanUpRepository()
+{
+    showRemovableBranches
+    if  ! [ -z "$removableBranches" ]  &&  [ "$removableBranches" != "" ] ; then
+        read -p "Press any key to remove listed branches..." -n1 -s
+        echo
+        for i in $removableBranches
+        do
+            echo -e "\nTry to remove $i..."
+            git branch -d $i
+        done
+    fi
+}
+
+
+##############################
+# own functions
+##############################
+ultrapipe()
+{
+    while read filename; do
+        #editor of choice
+        "C:\Program Files (x86)\Tools\UltraEdit\uedit32.exe" $filename &
+    done;
+}
+
+allRepoDoc()
+{
+    git ls-files | grep '\.md' | \
+    while read filename; do
+        Code.exe $filename & #opens with VS Code
+    done;
+}
+
+# Updates all smartDiff files or one specified file (parameter 1)
+makeSmartDiffFiles()
+{
+ REPODIR=$(pwd)
+ REPODIR=${REPODIR/\/g\//G:\/}
+ # FILES_PATTERN contains types of SSAS, SSIS, SSRS (and XPDL)
+ FILES_PATTERN='*\.(cube|database|dim|ds|dsv|dtsx|partitions|rdl|role|xpdl)$';
+ SMART_DIFF_FOLDER='smartDiff';
+ SMART_DIFF_FILTER="^$SMART_DIFF_FOLDER/";
+ if [ $# -lt 1 ]
+ then
+  git ls-files | \
+  grep -v $SMART_DIFF_FILTER | \
+  grep -E $FILES_PATTERN | \
+  while read FILE_NAME;
+  do
+   c:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -Command "$CI_FOLDER/master/build/smartDiff.ps1 '$REPODIR' '$FILE_NAME' '$SMART_DIFF_FOLDER'";
+   if [ $? -eq 0 ]
+   then
+    echo "Transfered to $SMART_DIFF_FOLDER folder: $FILE_NAME";
+   fi
+  done
+ elif [ $# -eq 1 ]
+ then
+  c:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy RemoteSigned -Command "$CI_FOLDER/master/build/smartDiff.ps1 '$REPODIR' '$1' '$SMART_DIFF_FOLDER'";
+  if [ $? -eq 0 ]
+  then
+   echo "Transfered to $SMART_DIFF_FOLDER folder: $1";
+  fi
+ else
+  echo "Not defined for more than one file."
+ fi
+}
+
+
+##################
+### standard aliases
+##################
+# Some aliases for easier work
+alias ll='ls -all --color=auto'
+alias g='git'
+alias gl='git log -n 10'
+alias ga='git add '
+alias gb='git branch '
+alias gc='git commit'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gs='git status'
+alias gsh='git show $1'
+alias gf='fetchRemoteBranch'
+alias gk='gitk --all&'
+alias gx='git gui &'
+alias go=changeBranch
+# Show what changed in the last 24 hours:
+alias gdaily="git log --since '1 day ago' --oneline"
+# Show five most recent changes:
+alias gtop5='git log --oneline | head -n 5'
+
+##################
+## Own aliases
+##################
+alias OldRep='cd $RepoDirectory/$(whoami)'
+alias cdaten='cd /c/Daten/Git'
+
+alias codepref='cd /c/Users/$(whoami)/.vscode'
+
+alias gfp='git fetch --prune'
+#alias gp='git push'
+alias gbd='git branch -d' #delete local branch
+#alias gdt='git difftool HEAD $1 -y'
+alias cu=cleanUpRepository
+
+alias lg1="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)'"
+alias lg2="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all"
+alias lg3="git log --graph --oneline --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold green)%d%C(reset)'"
+alias lg4="git log --graph  --format=format:'%C(bold blue)%an: %C(reset)%C(bold white)%s%C(reset) %C(auto)%n%-d%C(reset)'"
+alias lg5="git log --graph --format=format:'%C(bold cyan)%>(12,trunc)%an:%C(reset) %C(bold blue)%h%C(reset) %C(bold white)%<(80,mtrunc)%s%C(reset) %C(auto)%n%-d%C(reset)'"
+alias lg='lg5'
+
+alias smartdiff='makeSmartDiffFiles $1'
+#alias bashrc='vim ~/.bashrc' --conflicts with "ga bashrc" on CLI
+#alias gitconfig='vim ~/.gitconfig'
+
+alias ultraedit='"C:\Program Files (x86)\Tools\UltraEdit\uedit32.exe"'
+alias notepadpp=''
+alias doku="git ls-files | grep '\.md' | ultrapipe"
+
+# Autocompletion functions of git for some of the aliases
+__git_complete go _git_checkout
+__git_complete gf _git_branch
+__git_complete gb _git_branch
+__git_complete g __git_main
+__git_complete smartdiff _git_checkout #to get autocompletion for smartdiff; ls-files or something similar would be better
+
+###
+### My own Add-Ons
+###
+##################
+
+#alias glb='git log master..origin/master'
+alias glb='git log HEAD..origin'
+#git diff HEAD...origin #alles in einem langen Diff-"Patch"
+alias rmb='git branch -d'
+alias rmbr='git push origin --delete'
+__git_complete rmb _git_branch
+
+#alias smartdiff='.git/hooks/pre-commit'
+
+alias gph='git push'
+alias gphorig='git push --set-upstream origin'
+alias gp='git pull'
+
+#export LIQUIBASE_HOME="DatabaseChangeLog"
+#export JAVA_OPTS="-Djava.library.path=$myCiFolder/build/liquibase/sqljdbc_6.0.8112.100_enu/sqljdbc_6.0/enu/auth/x64"
+export PATH=$PATH:$LIQUIBASE_HOME

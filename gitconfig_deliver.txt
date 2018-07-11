@@ -1,0 +1,67 @@
+[core]
+   # Diese Einstellung definiert den Editor der von der git bash verwendet wird (z.B. bei commits, git config --edit etc.)
+	#editor = C:/Daten/MicrosoftVsCode/Code.exe --wait
+#in cmd.exe:  V:\> set PATH=%PATH%;"C:\Program Files (x86)\Microsoft VS Code\
+  #editor = "code --wait"
+  editor = "vim"
+  ignorecase = false
+	autocrlf = true
+	#autocrlf = true
+	#excludesfile = C:Users\\<account>\\Eigene Dateien\\gitignore_global.txt
+[gui]
+   encoding = utf-8
+	recentrepo = //$REPODIR/$USER/reponame
+[user]
+	name = Ludger lootsy
+	email = lootsy@example.com
+[diff]
+   #external = 'c:/Daten/Tools/Git/extdiff.sh' #Diese Datei muss zunaechst erstellt werden.
+   tool = myDiffTool
+[difftool "myDiffTool"]
+   ##cmd = 'c:/Program Files (x86)/SourceGear/Vault Client/sgdm.exe' "$LOCAL" "$REMOTE"
+   cmd = 'C:/Program Files (x86)/Microsoft VS Code/Code.exe' --wait --diff "$LOCAL" "$REMOTE"
+   ##"C:\Program Files (x86)\SourceGear\Vault Client\sgdm.exe"
+[merge]
+   tool = myMergeTool
+[mergetool "myMergeTool"]
+   cmd = 'C:/Program Files (x86)/Microsoft VS Code/Code.exe' --wait "$MERGED"
+   ##cmd = 'c:/Program Files (x86)/SourceGear/Vault Client/sgdm.exe' -merge -result="$PWD/$MERGED" "$PWD/$LOCAL" "$PWD/$BASE" "$PWD/$REMOTE"
+   # trustExitCode = true
+[mergetool]
+   keepBackup = false
+[alias]
+   # Hier können Abkürzungen definiert werden, z.B. für git add datei.extension + git commit datei.extension kann ac wie folgt definiert werden:
+   #ac = !git add -A && git commit
+   # Aufruf von git chris mit optionalen int parameter, z.B. git chris 3 ==> letzen 3 Commits des Authors FooBar
+   #foo = !git log --author=FooBar --max-count
+[format]
+   # Umformatierung der Konsolenausgabe z.B. bei git log
+   pretty = %C(bold cyan)%h%Creset%C(bold yellow) (%cr) %C(bold green)(%an)%n%C(bold white)%w(120,0,0)%s%n %b
+[color]
+   ui = always
+[color "branch"]
+   current = yellow bold
+   local = green bold
+   remote = cyan bold
+[color "diff"]
+   meta = yellow bold
+   frag = magenta bold
+   old = red bold
+   new = green bold
+   whitespace = red reverse
+[color "status"]
+   added = green bold
+   changed = yellow bold
+   untracked = red bold
+[push]
+   default = simple
+[url "https://"]
+   insteadOf = git://
+[credential]
+# Die folgende Einstellung kann in Zusammenhang mit Anmeldungen wie bei z.B. Stash verwendet werden.
+# Sie sorgt dafür, dass die windowseigene Anmeldeinformationsverwaltung für die Speicherung des Passwortes genutzt wird.
+  helper = wincred
+# Compared to Git's built-in credential storage for Windows (wincred), which provides single-factor authentication support working on any HTTP enabled Git repository, GCM provides multi-factor authentication support for Visual Studio Team Services, Team Foundation Server, and GitHub.
+# helper = manager
+[alias]
+  whatadded = log --diff-filter=A #usage git whatadded -- myfile.txt
