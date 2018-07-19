@@ -1,0 +1,46 @@
+pipe
+grep / cut sort -u / wc
+tr
+
+echo Hallo ihr Interessiereten | wc
+
+awk
+sed
+perl
+vi
+
+Welche gibt es?
+
+File Redirection 
+
+2>&1
+
+0, 1, 2
+input, output, error
+
+$0 programm name
+
+$1 Argument
+
+Ctrl V Ctr I ist TAB
+
+df -h
+du
+
+reg Exp
+grep Anfang Ende, Nein 2-4 Auftreten
+
+Funktionen
+alias
+
+[ `echo Hallo ihr | wc -l` = 1 ] && echo passt || echo nee
+
+$[ 1 + 2 * 3 ]
+
+https://programm.froscon.de/2017/system/event_attachments/attachments/000/000/468/original/froscon-2017-es-muss-mal-wieder-shell-sein.history.txt
+https://media.ccc.de/v/froscon2017-2053-es_muss_mal_wieder_shell_sein#t=0
+
+https://av.tib.eu/media/20958
+bash und strace
+
+!$ letztes Argument iwrd wiederholt
